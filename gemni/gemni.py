@@ -1,20 +1,17 @@
 import google.generativeai as genai
 import os
+from dotenv import load_dotenv
 
-
-# API_KEY = os.environ["API_KEY"]
-
-# genai.configure(api_key=os.environ["API_KEY"])
-
-
+load_dotenv()
 API_KEY = os.getenv('API_KEY')
+
+if API_KEY is None:
+    print("No API_KEY Found!")
+    
 genai.configure(api_key=API_KEY)
 
+model = genai.GenerativeModel('gemini-pro')
 
-print(os.getenv('API_KEY'))
+response = model.generate_content("Hell who are you, and what is 1 +1")
 
-model = genai.GenerativeModel('gemini-pro"')
-
-
-response = model.generate_content("Write a story about a AI and magic")
 print(response.text)
