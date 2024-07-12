@@ -11,3 +11,6 @@ static/
 /user_tokens
 conversation_history.pkl
 debug.log
+.env
+API_KEY_GEMINI/
+API_KEY_GEMINI
