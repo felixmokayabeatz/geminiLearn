@@ -1,34 +1,65 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QTextEdit
+from PyQt5.QtCore import Qt
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
-dotenv_path = 'G:/geminiLearn/geminiLearn/API_KEY_GEMINI/.env'
+class ChatApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        self.setup_genai()
 
-# Load environment variables from the specified .env file
-load_dotenv(dotenv_path)
+    def initUI(self):
+        self.setWindowTitle('ChatBot App')
+        self.setGeometry(100, 100, 600, 400)
 
-API_KEY = os.getenv('API_KEY_GEMINI')
+        # Layouts
+        layout = QVBoxLayout()
+        self.setLayout(layout)
 
-if API_KEY is None:
-    print("No API_KEY Found!")
-    exit()
+        # Text display area
+        self.text_display = QTextEdit()
+        self.text_display.setReadOnly(True)
+        layout.addWidget(self.text_display)
 
-genai.configure(api_key=API_KEY)
+        # Input area
+        input_layout = QHBoxLayout()
+        layout.addLayout(input_layout)
 
-model = genai.GenerativeModel('gemini-pro')
+        self.input_field = QLineEdit()
+        input_layout.addWidget(self.input_field)
 
-# ANSI escape code for blue text and bold text
-BLUE = '\033[34m'  # Blue text
-BOLD = '\033[1m'   # Bold text
-RESET = '\033[0m'  # Reset to default color and style
+        send_button = QPushButton('Send')
+        send_button.clicked.connect(self.send_message)
+        input_layout.addWidget(send_button)
 
-while True:
-    # Display prompt in blue and bold
-    prompt = input(f"{BLUE}{BOLD}Ask me anything (or type 'exit' to quit): {RESET}")
-    
-    if prompt.lower() == 'exit':
-        print("Goodbye!")
-        break
+    def setup_genai(self):
+        dotenv_path = 'G:/geminiLearn/geminiLearn/API_KEY_GEMINI/.env'
+        load_dotenv(dotenv_path)
+        API_KEY = os.getenv('API_KEY_GEMINI')
 
-    response = model.generate_content(prompt)
-    print(response.text)
+        if API_KEY is None:
+            print("No API_KEY Found!")
+            return
+
+        genai.configure(api_key=API_KEY)
+        self.model = genai.GenerativeModel('gemini-pro')
+
+    def send_message(self):
+        message = self.input_field.text().strip()
+        if message:
+            response = self.model.generate_content(message)
+            self.display_message(f"You: {message}")
+            self.display_message(f"ChatBot: {response.text}")
+        self.input_field.clear()
+
+    def display_message(self, message):
+        self.text_display.append(message)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    chat_app = ChatApp()
+    chat_app.show()
+    sys.exit(app.exec_())
